@@ -13,16 +13,17 @@ library('data.table')
 
 # Le banco
 dados <- fread(
-  file = './base_srag_boletim07Jul.csv',
+  file = '../BancoDeDadosAtualizado/base_srag_boletim22Jul.csv',
   sep = ';',
   quote = "\"",
   encoding = 'Latin-1',
   header = TRUE
 )
 
+banco = '200722'
 ###########################################################
-######      SELECIONE O N?MERO M?NIMO DE DIAS        ######
-minimo_dias <- 21
+######  SELECIONE O NUMERO MINIMO DE DIAS COM CASOS  ######
+minimo_dias <- 10
 ###########################################################
 dados <- dados %>%
   rename(DRS = `17DRS`)
@@ -65,17 +66,17 @@ for (i in seq(1:length(agregado))) {
                             guide = "legend") +
       labs(x = "Data", y = "Casos") +
       ggtitle(paste(agregado[i],"-",ids_agregados[[1]][j],sep = "")) 
-    ggsave(filename = paste('Inc_Corrig-', agregado[i], "-", ids_agregados[[1]][j], ".png", sep = ""),
+    ggsave(filename = paste(banco, '_Inc_Corrig-', agregado[i], "-", ids_agregados[[1]][j], ".png", sep = ""),
             width = 12, height = 8, dpi = 300)
     nivel_agregado1 <- nivel_agregado %>%
       select(dates,I)
 
-    if (length(nivel_agregado)>10) {
+    if (count(nivel_agregado1 %>% filter(nivel_agregado1$I>0))>minimo_dias) {
       res <- estimate_R(incid = nivel_agregado1,
                         method = "parametric_si",
                         config = make_config(list(mean_si = 4.7, std_si = 2.9)))
       png(
-        file = paste('Rt_Corr-', agregado[i], "-", ids_agregados[[1]][j], ".png", sep = ""),
+        file = paste(banco, '_Rt_Corr-', agregado[i], "-", ids_agregados[[1]][j], ".png", sep = ""),
         width = 1800,
         height = 2200,
         res = 300
@@ -85,3 +86,4 @@ for (i in seq(1:length(agregado))) {
     }
   }
 }
+
