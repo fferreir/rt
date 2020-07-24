@@ -10,22 +10,23 @@ library('EpiEstim')
 library('tidyverse')
 library('data.table')
 
-# Lê banco
-dados <- fread(file = '../SRAG_Python/base_srag_boletim02Jun.csv',
+# L? banco
+dados <- fread(file = '../BancoDeDadosAtualizado/base_srag_boletim22Jul.csv',
                sep = ';',
                quote = "\"",
                encoding = 'Latin-1',
                header = TRUE)
 
+banco = '200722'
 ###########################################################
-######      SELECIONE O NÙMERO MÍNIMO DE DIAS        ######
-minimo_dias <- 21
+######  SELECIONE O N?MERO M?NIMO DE DIAS COM CASOS  ######
+minimo_dias <- 10
 ###########################################################
 
 agregado <- c('SG_UF', '17DRS', 'ID_RG_RESI', 'ID_MN_RESI')
 
 for (i in seq(1:length(agregado))) {
-  # Análise dos municípios com série de dados maior que 27 dias
+  # An?lise dos munic?pios com s?rie de dados maior que 27 dias
   dados_covid <- dados %>%
     filter(classi == 'COVID-19')  %>%
     select(.data[[agregado[i]]], DT_SIN_PRI) %>%
@@ -41,11 +42,11 @@ for (i in seq(1:length(agregado))) {
       complete(dates = seq.Date(min(dates), max(dates), by = "day")) %>%
       replace_na(list(I = 0))
 
-    if (lengths(nivel_agregado)[1] > minimo_dias) {
+    if (nrow(nivel_agregado %>% filter(nivel_agregado$I>0)) > minimo_dias) {
       res <- estimate_R(incid = nivel_agregado,
                         method = "parametric_si",
                         config = make_config(list(mean_si = 4.7, std_si = 2.9)))
-      png(file = paste(agregado[i],"-",ids_agregados[[1]][j],".png",sep = ""),
+      png(file = paste(banco, agregado[i],"-",ids_agregados[[1]][j],".png",sep = ""),
           width = 1800, height = 2200, res = 300)
       plot(res)
       dev.off()
